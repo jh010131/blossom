@@ -38,3 +38,16 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 docker -v
 # Docker version 24.0.2, build cb74dfc
 ```
+
+##### Vagrantfile nginx에 맞추어 변경하는 내용
+```bash
+docker run -it -d -p 8080:80 --name nginx-server nginx
+docker cp /vagrant/sample2 nginx-server:/usr/share/nginx/html/
+```
+
+### Docker Token 등록
+1. DC01 디렉토리로 이동
+2. DC01 디렉토리에서 env 디렉토리 생성
+3. env 디렉토리 안에서 docker_token 파일 생성<br>
+현재 README.md 파일이 있는 위치에 env 디렉토리를 생성하고 env 디렉토리 안에 docker_token 파일을 생성.<br>
+env/docker_token 파일을 생성하여 [docker hub](https://hub.docker.com/settings/security) 사이트에 접속하여 생성한 Token을 등록합니다.
