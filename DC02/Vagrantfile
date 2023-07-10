@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
         sudo apt-get update
         sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
         sudo usermod -a -G docker vagrant
-        docker login -u kjh010131 --password-stdin < /vagrant/env/docker_token
+        docker login -u jh010131 --password-stdin < /vagrant/env/docker_token
         docker pull httpd
         docker plugin install --grant-all-permissions vieux/sshfs
         docker volume create --driver vieux/sshfs \
@@ -44,7 +44,7 @@ Vagrant.configure("2") do |config|
       sshfs.vm.provision "shell", inline: <<-SCRIPT
         sudo useradd -m -s /bin/bash sshfs
         echo "sshfs:qwerasdfzxcv" | sudo chpasswd
-        git clone https://github.com/kjh010131/static-web-temp.git
+        git clone https://github.com/jh010131/static-web-temp.git
         sudo mkdir /home/sshfs/htdocs
         sudo cp -r static-web-temp/* /home/sshfs/htdocs/
         sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' \
