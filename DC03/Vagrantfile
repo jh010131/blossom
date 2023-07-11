@@ -9,7 +9,7 @@ echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docke
 sudo apt-get update -y
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 sudo usermod -a -G docker vagrant
-docker login -u jh010131 --password-stdin < /vagrant/env/docker_token
+docker login -u kjh010131 --password-stdin < /vagrant/env/docker_token
 SCRIPT
 
 Vagrant.configure("2") do |config|
