@@ -4,15 +4,46 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
 
-  config.vm.define "ubuntu" do |ubuntu|
-    ubuntu.vm.hostname = "mz-server"
-    ubuntu.vm.provider "virtualbox" do |vb|
-    vb.name = "ubuntu-server"
+  config.vm.define "d1" do |d1|
+    d1.vm.hostname = "d1"
+    d1.vm.provider "virtualbox" do |vb|
+    vb.name = "d1"
     vb.cpus = 2
     vb.memory = 2048
     end
-    ubuntu.vm.network "private_network", ip: "192.168.33.10"
-    ubuntu.vm.network "public_network"
-    ubuntu.vm.network "forwarded_port", host: 80, guest: 80
+    d1.vm.network "public_network"
+    d1.vm.network "private_network", ip: "192.168.0.2"
+
+    d1.vm.provision "shell", inline: <<-SCRIPT
+      sudo ip route del default via 10.0.2.2 dev enp0s3
+    SCRIPT
+  end
+
+  config.vm.define "d2" do |d2|
+    d2.vm.hostname = "d2"
+    d2.vm.provider "virtualbox" do |vb|
+    vb.name = "d2"
+    vb.cpus = 2
+    vb.memory = 2048
+    end
+    d2.vm.network "private_network", ip: "192.168.0.3"
+
+    d2.vm.provision "shell", inline: <<-SCRIPT
+      sudo ip route del default via 10.0.2.2 dev enp0s3
+    SCRIPT
+  end
+
+  config.vm.define "d3" do |d3|
+    d3.vm.hostname = "d3"
+    d3.vm.provider "virtualbox" do |vb|
+    vb.name = "d3"
+    vb.cpus = 2
+    vb.memory = 2048
+    end
+    d3.vm.network "private_network", ip: "192.168.0.4"
+
+    d3.vm.provision "shell", inline: <<-SCRIPT
+      sudo ip route del default via 10.0.2.2 dev enp0s3
+    SCRIPT
   end
 end
