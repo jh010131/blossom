@@ -11,8 +11,8 @@ Vagrant.configure("2") do |config|
     vb.cpus = 2
     vb.memory = 2048
     end
-    ubuntu.vm.network "forwarded-port", host: 80 guest: 80
     ubuntu.vm.network "private_network", ip: "192.168.33.10"
-    ubuntu.vm.network "public-network"
+    ubuntu.vm.network "public_network"
+    ubuntu.vm.network "forwarded_port", host: 80, guest: 80
   end
 end
