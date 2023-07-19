@@ -19,32 +19,32 @@ Vagrant.configure("2") do |config|
     SCRIPT
   end
 
-  config.vm.define "web-server1" do |web-server1|
-    web-server1.vm.hostname = "web-server1"
-    web-server1.vm.provider "virtualbox" do |vb|
-    vb.name = "web-server1"
+  config.vm.define "web_server1" do |web_server1|
+    web_server1.vm.hostname = "web_server1"
+    web_server1.vm.provider "virtualbox" do |vb|
+    vb.name = "web_server1"
     vb.cpus = 2
     vb.memory = 2048
     end
-    web-server1.vm.network "private_network", ip: "192.168.33.10"
+    web_server1.vm.network "private_network", ip: "192.168.33.10"
 
-    web-server1.vm.provision "shell", inline: <<-SCRIPT
+    web_server1.vm.provision "shell", inline: <<-SCRIPT
       sudo ip route del default via 10.0.2.2 dev enp0s3
       sudo apt-get update
       sudo apt-get install -y nginx
     SCRIPT
   end
 
-  config.vm.define "web-server2" do |web-server2|
-    web-server2.vm.hostname = "web-server2"
-    web-server2.vm.provider "virtualbox" do |vb|
-    vb.name = "web-server2"
+  config.vm.define "web_server2" do |web_server2|
+    web_server2.vm.hostname = "web_server2"
+    web_server2.vm.provider "virtualbox" do |vb|
+    vb.name = "web_server2"
     vb.cpus = 2
     vb.memory = 2048
     end
-    web-server2.vm.network "private_network", ip: "192.168.33.20"
+    web_server2.vm.network "private_network", ip: "192.168.33.20"
 
-    web-server2.vm.provision "shell", inline: <<-SCRIPT
+    web_server2.vm.provision "shell", inline: <<-SCRIPT
       sudo ip route del default via 10.0.2.2 dev enp0s3
       sudo apt-get update
       sudo apt-get install -y nginx
