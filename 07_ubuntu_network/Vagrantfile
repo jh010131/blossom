@@ -4,61 +4,103 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
 
-  config.vm.define "gateway" do |gateway|
-    gateway.vm.hostname = "gateway"
-    gateway.vm.provider "virtualbox" do |vb|
-    vb.name = "gateway"
+  config.vm.define "gw1" do |gw1|
+    gw1.vm.hostname = "gateway1"
+    gw1.vm.provider "virtualbox" do |vb|
+    vb.name = "gateway1"
     vb.cpus = 2
     vb.memory = 2048
     end
-    gateway.vm.network "public_network"
-    gateway.vm.network "private_network", ip: "192.168.123.254", virtualbox_intnet: true
+    gw1.vm.network "public_network"  # DHCP
+    gw1.vm.network "private_network", ip: "192.168.123.254", virtualbox__intnet: true
 
-    gateway.vm.provision "shell", inline: <<-SCRIPT
+    gw1.vm.provision "shell", inline: <<-SCRIPT
       sudo ip route del default via 10.0.2.2 dev enp0s3
+      sudo sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
+      sudo sysctl -p
+      sudo iptables -t nat -A POSTROUTING -s 192.168.123.10 -o enp0s8 -j LOG --log-prefix='[MASQ]'
+      sudo iptables -t nat -A POSTROUTING -s 192.168.123.10 -o enp0s8 -j MASQUERADE
     SCRIPT
   end
 
-  config.vm.define "nginxlb" do |nginxlb|
-    nginxlb.vm.hostname = "nginxlb"
-    nginxlb.vm.provider "virtualbox" do |vb|
-    vb.name = "nginxlb"
+  config.vm.define "docker_reg" do |docker_reg|
+    docker_reg.vm.hostname = "docker-registry"
+    docker_reg.vm.provider "virtualbox" do |vb|
+    vb.name = "docker-registry"
     vb.cpus = 2
     vb.memory = 2048
     end
-    nginxlb.vm.network "public_network"
-    nginxlb.vm.network "private_network", ip: "192.168.123.10", virtualbox_intnet: true
-
-    nginxlb.vm.provision "shell", inline: <<-SCRIPT
+    # ubuntu 20.04의 인터페이스명 -> enp0s8
+    docker_reg.vm.network "private_network", ip: "192.168.123.10", virtualbox__intnet: true
+    # ubuntu 20.04의 인터페이스명 -> enp0s9
+    docker_reg.vm.network "private_network", ip: "192.168.223.10", virtualbox__intnet: true
+    docker_reg.vm.provision "shell", inline: <<-SCRIPT
       sudo ip route del default via 10.0.2.2 dev enp0s3
+      sudo ip route add default via 192.168.123.254 dev enp0s8
+      sudo apt-get update -y
+      sudo apt-get install -y ca-certificates curl gnupg
+      sudo install -m 0755 -d /etc/apt/keyrings
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      sudo chmod a+r /etc/apt/keyrings/docker.gpg
+      echo \
+        "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      sudo apt-get update -y
+      sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      sudo usermod -a -G docker vagrant
+      sudo tee /etc/docker/daemon.json << EOF
+        { "insecure-registries": ["http://repo.image.co.kr"] }
+      EOF
+      sudo systemctl restart docker
+      sudo docker run -d --restart=always --name repository \
+        -e REGISTRY_HTTP_ADDR=0.0.0.0:80 -p 80:80 registry
+      sudo su - -c 'echo "192.168.223.10 repo.imagee.co.kr" >> /etc/hosts'
     SCRIPT
   end
 
-  config.vm.define "webserver1" do |webserver1|
-    webserver1.vm.hostname = "webserver1"
-    webserver1.vm.provider "virtualbox" do |vb|
-    vb.name = "webserver1"
+  config.vm.define "docker" do |docker|
+    docker.vm.hostname = "docker"
+    docker.vm.provider "virtualbox" do |vb|
+    vb.name = "docker"
     vb.cpus = 2
     vb.memory = 2048
     end
-    webserver1.vm.network "private_network", ip: "192.168.223.10", virtualbox_intnet: true
+    docker.vm.network "private_network", ip: "192.168.223.20", virtualbox__intnet: true
 
-    webserver1.vm.provision "shell", inline: <<-SCRIPT
+    docker.vm.provision "shell", inline: <<-SCRIPT
       sudo ip route del default via 10.0.2.2 dev enp0s3
+      sudo ip route add default via 192.168.223.254 dev enp0s8
+      sudo apt-get update -y
+      sudo apt-get install -y ca-certificates curl gnupg
+      sudo install -m 0755 -d /etc/apt/keyrings
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      sudo chmod a+r /etc/apt/keyrings/docker.gpg
+      echo \
+        "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      sudo apt-get update -y
+      sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      sudo usermod -a -G docker vagrant
     SCRIPT
   end
 
-  config.vm.define "webserver2" do |webserver2|
-    webserver2.vm.hostname = "webserver2"
-    webserver2.vm.provider "virtualbox" do |vb|
-    vb.name = "webserver2"
+  config.vm.define "gw2" do |gw2|
+    gw2.vm.hostname = "gateway2"
+    gw2.vm.provider "virtualbox" do |vb|
+    vb.name = "gateway2"
     vb.cpus = 2
     vb.memory = 2048
     end
-    webserver2.vm.network "private_network", ip: "192.168.223.20", virtualbox_intnet: true
-
-    webserver2.vm.provision "shell", inline: <<-SCRIPT
+    gw2.vm.network "private_network", ip: "192.168.223.254", virtualbox__intnet: true
+    gw2.vm.network "public_network"
+    gw2.vm.provision "shell", inline: <<-SCRIPT
       sudo ip route del default via 10.0.2.2 dev enp0s3
+      sudo sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
+      sudo sysctl -p
+      sudo iptables -t nat -A POSTROUTING -s 192.168.223.20 -o enp0s9 -j LOG --log-prefix='[MASQ]'
+      sudo iptables -t nat -A POSTROUTING -s 192.168.223.20 -o enp0s9 -j MASQUERADE
     SCRIPT
   end
 end
