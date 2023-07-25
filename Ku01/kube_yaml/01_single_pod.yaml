@@ -1,14 +1,10 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: myapp
+  name: web-pod-nginx
   labels:
-    name: mypod
-    version: "1"
-    date: "2023-07-25"
-    year: "2023"
-    month: "07"
-    day: "25"
+    app: web
+    app-type: nginx
 spec:
   containers:
   - name: web-nginx
@@ -16,8 +12,19 @@ spec:
     resources:
       limits:
         memory: "128Mi"
-        cpu: "500m"
+        cpu: "2500m"
     ports:
       - containerPort: 80
+  - name: alpine
+    image: alpine:latest
+    args:
+    - /bin/bash
+    - -c
+    - "while true; do echo 'running'; sleep; 10; done"
+    resources:
+      limits:
+        memory: "256Mi"
+        cpu: "500m"
   imagePullSecrets:
   - name: docker-pull-secret
+  

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-pod-httpd
+  labels:
+    app: web
+    app-type: apache2
+spec:
+  containers:
+  - name: web-apache2
+    image: httpd:latest
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "250m"
+    ports:
+      - containerPort: 80
+  imagePullSecrets:
+  - name: docker-pull-secret
