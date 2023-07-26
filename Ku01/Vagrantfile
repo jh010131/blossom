@@ -32,4 +32,15 @@ Vagrant.configure("2") do |config|
         end
         wn2.vm.network "private_network", ip: "192.168.10.13"
     end
+
+    config.vm.define "dock" do |dock|
+        dock.vm.hostname = "docker-registry"
+        dock.vm.provider "virtualbox" do |vb|
+          vb.name = "docker-registry"
+          vb.cpus = 2
+          vb.memory = 4096
+        end
+        dock.vm.network "private_network", ip: "192.168.10.14"
+        dock.vm.network "public_network"
+      end
 end
