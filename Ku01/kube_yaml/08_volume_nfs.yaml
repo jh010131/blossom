@@ -13,12 +13,13 @@ spec:
         memory: "128Mi"
         cpu: "500m"
     volumeMounts:
-    - name: host-volume
+    - name: nfs-volume
       mountPath: /usr/share/nginx/html
   volumes:
-  - name: host-volume
-    hostpath:
-      path: /tmp/pod
-      type: DirectoryOrCreate
+  - name: nfs-volume
+    nfs:
+      path: /mnt/nfs_share1
+      server: 192.168.10.14
+      readOnly: true
   imagePullSecrets:
   - name: docker-pull-secret

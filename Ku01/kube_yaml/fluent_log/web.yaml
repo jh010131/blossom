@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: httpd-web
+  labels:
+    name: httpd-web
+spec:
+  containers:
+  - name: httpd-web
+    image: httpd
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    volumeMounts:
+    - name: log
+      mountPath: /usr/local/apache2/logs
+  volumes:
+  - name: log
+    emptyDir: {}
+  imagePullSecrets:
+  - name: docker-pull-secret
