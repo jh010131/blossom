@@ -4,9 +4,14 @@ metadata:
   name: fluent-bit-config
 data:
   fluent-bit.conf: |
+    [SERVICE]
+        flush 1
+        daemon Off
     [INPUT]
         Name          tail
         Path          /fluent-bit/log/access.log, /fluent-bit/log/error.log
+        multiline.parser apache2,apache_error
+        Refresh_Interval 10
 
     [OUTPUT]
         Name          syslog
