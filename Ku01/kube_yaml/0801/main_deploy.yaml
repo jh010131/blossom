@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-static-web
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: main-web
+  template:
+    metadata:
+      labels:
+        app: main-web
+    spec:
+      volumes:
+      - name: nfs-vol
+        persistentVolumeClaim:
+          claimName: nfs-vol
+      containers:
+      - name: nginx-static-web
+        image: nginx
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: nfs-vol
+          mountPath: /usr/share/nginx/html
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+      - name: docker-pull-secret

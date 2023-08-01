@@ -1,0 +1,5 @@
+resources:
+  - nfs.yaml
+  - main_deploy.yaml
+  - test_deploy.yaml
+  - ingress.yaml
