@@ -4,7 +4,7 @@ metadata:
   name: role-test-pod
   labels:
     name: role-test-pod
-  namesapce: user-space
+  namespace: user-space
 spec:
   containers:
   - name: role-test-pod
