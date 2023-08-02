@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: role-test-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: role-test-deploy
+  template:
+    metadata:
+      labels:
+        app: role-test-deploy
+    spec:
+      containers:
+      - name: role-test-deploy
+        image: nginx:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+      - name: docker-pull-secret
