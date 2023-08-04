@@ -1,0 +1,5 @@
+resources:
+- apache_config_map.yaml
+- apache_ssl_config_map.yaml
+- apache_ssl_tls_secret.yaml
+- apache_pod.yaml
