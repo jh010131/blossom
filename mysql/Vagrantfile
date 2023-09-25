@@ -1,0 +1,73 @@
+$script = <<-SCRIPT
+sudo apt-get install gnupg curl
+
+curl -fsSL https://pgp.mongodb.com/server-7.0.asc | \
+sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg \
+--dearmor
+
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ]\
+https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/7.0 multiverse" | \
+sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+
+sudo apt-get update
+
+sudo apt-get install -y mongodb-org
+
+echo "mongodb-org hold" | sudo dpkg --set-selections
+echo "mongodb-org-database hold" | sudo dpkg --set-selections
+echo "mongodb-org-server hold" | sudo dpkg --set-selections
+echo "mongodb-mongosh hold" | sudo dpkg --set-selections
+echo "mongodb-org-mongos hold" | sudo dpkg --set-selections
+echo "mongodb-org-tools hold" | sudo dpkg --set-selections
+SCRIPT
+
+Vagrant.configure("2") do |config|
+    config.vm.box = "ubuntu/focal64"
+
+    config.vm.define "gw" do |gw|
+        gw.vm.hostname = "gw-server"
+        gw.vm.provider "virtualbox" do |vb|
+            vb.name = "gw-server"
+            vb.cpus = 4
+            vb.memory = 4096
+        end
+        gw.vm.network "private_network", ip: "192.168.10.11"
+        gw.vm.network "public_network", ip: "192.168.101.31", 
+                        netmask: "255.255.254.0",
+                        gateway: "192.168.100.1"
+    end
+
+    config.vm.define "mongos" do |mongos|
+        mongos.vm.hostname = "mongos-server"
+        mongos.vm.provider "virtualbox" do |vb|
+            vb.name = "mongos-server"
+            vb.cpus = 4
+            vb.memory = 4096
+        end
+        mongos.vm.network "private_network", ip: "192.168.10.21"
+        mongos.vm.provision "shell", inline: $script
+    end
+
+    config.vm.define "gw1" do |gw1|
+        gw1.vm.hostname = "gw-server1"
+        gw1.vm.provider "virtualbox" do |vb|
+            vb.name = "gw-server1"
+            vb.cpus = 4
+            vb.memory = 4096
+        end
+        gw1.vm.network "private_network", ip: "192.168.10.10"
+        gw1.vm.network "public_network", ip: "192.168.101.30", 
+                        netmask: "255.255.254.0",
+                        gateway: "192.168.100.1"
+    end
+    config.vm.define "config" do |config|
+        config.vm.hostname = "mongo-config"
+        config.vm.provider "virtualbox" do |vb|
+            vb.name = "mongo-config"
+            vb.cpus = 4 
+            vb.memory = 4096
+        end
+        config.vm.network "private_network", ip: "192.168.10.20"
+        config.vm.provision "shell", inline: $script
+    end
+end
